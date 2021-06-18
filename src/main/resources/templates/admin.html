@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="/webjars/jquery/3.3.1/jquery.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $("#bt1").on("click", function () {
+                var s = "namerayon="+ $("input[name='namerayon']").val() +"&kod=" +$("input[name='kod']").val();
+                $("#ray").load("/pkv/frag",s, function () {
+                    $("#selectray").load("/pkv/frag2");
+                });
+            });
+
+            $("#usr").on('click', 'button', function () {
+                if ($(this).attr('id') == "bt2") {
+                    var s = "login=" + $("input[name='login']").val() +
+                        "&password=" + $("input[name='password']").val() +
+                        "&name=" + $("input[name='name']").val() +
+                        "&id=" + $("#selectray").val();
+                    $("#usr").load("/pkv/frag1",s);
+                }
+            });
+
+        });
+    </script>
+
+</head>
+<body>
+
+<div th:insert="fragment/logout :: logout"></div>
+
+    <input type="text" name="namerayon" placeholder="Название района">
+    <input type="text" name="kod" placeholder="Код района">
+    <button id="bt1" >Добавить</button><!--type="submit"-->
+
+<div>Районы</div>
+
+    <div id="ray" th:insert="fragment/ray :: frag (${rayons})"></div>
+
+    <div id="usr" th:insert="fragment/ray :: frag1 (${rayons},${users})"></div>
+
+</body>
+</html>

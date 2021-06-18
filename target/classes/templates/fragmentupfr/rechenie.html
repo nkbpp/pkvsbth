@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<body>
+
+<div th:fragment="recheniebody(zayavs)">
+    <table>
+        <tr>
+            <th align="center">УПФР</th>
+            <th align="center">ОПФР</th>
+            <th align="center">Решение</th>
+        </tr>
+        <tr th:each="z : ${zayavs}">
+            <td width="33%" align="center" name="upfr" th:include="fragmentupfr/otvet :: otupfr(${z})">
+            </td>
+            <td width="33%" align="center" name="opfr" th:include="fragmentupfr/otvet :: otopfr(${z})">
+            </td>
+            <td width="33%" align="center" name="rech" th:include="fragmentupfr/rechenie :: rech(${z})">
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+<div th:fragment="rech(z)">
+
+    <div class="row" th:if="${z.rech.nomRech==null}">
+        <div th:include="fragmentupfr/rechenie :: rechno(${z})"></div>
+    </div>
+    <div class="row" th:unless="${z.rech.nomRech==null}">
+        <div th:include="fragmentupfr/rechenie :: rechyes(${z})"></div>
+    </div>
+
+    <div class="row" name="otcatdiv" th:id="${z.id}">
+        <div class="col s12 center">
+            <a class="waves-effect waves-light btn-small"
+               th:value="${z.id}"
+               name="otcat">Откатить</a>
+            <!--th:value="${z.rech.idRech}"-->
+        </div>
+    </div>
+</div>
+
+<div th:fragment="rechyes(z)">
+    <div class="col s12 center">
+        <div class="row">
+            <div class="col s6 center">
+                Номер решения:
+            </div>
+            <div class="col s6 center" th:text="${z.rech.nomRech}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s6 center">
+                Дата решения:
+            </div>
+            <div class="col s6 center" th:text="${z.rech.dataRech}">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="rechno(z)">
+    <div class="col s12 center">
+        Решение не принято
+    </div>
+</div>
+
+
+
+</body>
+</html>

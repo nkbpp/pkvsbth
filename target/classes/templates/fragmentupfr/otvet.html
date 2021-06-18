@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<body>
+
+<div th:fragment="otvetbody(zayavs)">
+    <table>
+        <tr>
+            <th align="center">УПФР</th>
+            <th align="center">ОПФР</th>
+            <th align="center">Решение</th>
+        </tr>
+        <tr th:each="z : ${zayavs}">
+            <td width="33%" align="center" name="upfr" th:include="fragmentupfr/otvet :: otupfr(${z})">
+            </td>
+            <td width="33%" align="center" name="opfr" th:include="fragmentupfr/otvet :: otopfr(${z})">
+            </td>
+            <td width="33%" align="center" name="rech" th:include="fragmentupfr/otvet :: rech(${z.id})">
+            </td>
+        </tr>
+
+    </table>
+
+</div>
+
+
+<div th:fragment="otupfr(z)">
+    <div class="row">
+        <div class="col s12 center" th:text="'Регистрационный номер: ' + ${z.regnum}">
+        </div>
+        <div class="col s12 center" th:text="'Наименование:' + ${z.name}">
+        </div>
+        <div class="col s12 center" th:text="'ИНН: ' + ${z.inn}">
+        </div>
+        <div class="col s12 center" th:text="'КПП: ' + ${z.kpp}">
+        </div>
+        <div class="col s12 center" th:text="'Дата заявления: ' + ${z.date_zaya}">
+        </div>
+        <div class="col s12 center" th:text="'Статус: ' + ${z.stat.stat}">
+        </div>
+        <div class="col s12 center" th:if="${z.dokumentzayav} == null" th:text="'Заявление: -'">
+        </div>
+
+        <div th:unless="${z.dokumentzayav} == null" class="col s12 center"><!--th:text="'Заявление: ' ">-->
+            Заявление:
+            <a class="documentgetz"
+               th:href="@{/pkv/upfr/documentgetz(id=${z.dokumentzayav.idDokumentzayav})}"
+               th:text="${z.dokumentzayav.nameFile}"
+               download>
+            </a>
+        </div>
+
+        <table>
+            <tr>
+                <th>КБК</th>
+                <th>Вид платежа</th>
+                <th>Сумма</th>
+            </tr>
+            <tr th:each="kbk : ${z.kbkVids}">
+                <td th:text="${kbk.asvKbk.kbkCode}">
+                </td>
+                <td th:text="${kbk.asvKbk.getKbkShortName(20)}">
+                </td>
+                <td th:text="${kbk.summ1}">
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div th:fragment="otopfr(z)">
+    <div class="row">
+        <div class="col s12 center" th:text="'Номер запроса: ' + ${z.opfr.nomZap}">
+        </div>
+        <div class="col s12 center" th:text="'Дата направления в ФНС: ' + ${z.opfr.dataOtpr}">
+        </div>
+        <div class="col s12 center" th:text="'Номер ответа от ФНС: ' + ${z.opfr.nomOtv}">
+        </div>
+        <div class="col s12 center" th:text="'Дата ответа от ФНС: ' + ${z.opfr.dataOtv}">
+        </div>
+        <!--<div class="col s12 center" th:text="'User: ' + ${z.opfr.user.login}">
+        </div>-->
+        <!--        <div class="col s12 center" th:text="'Документ: ' +
+                ( (${z.opfr.dokumentu} == 'null')? '-' : ${z.opfr.dokumentu.nameDokument})">
+                </div>-->
+
+        <div class="col s12 center" th:if="${z.opfr.dokumentu} == null" th:text="'Документ: -'">
+        </div>
+        <div th:unless="${z.opfr.dokumentu} == null" class="col s12 center"><!--th:text="'Заявление: ' ">-->
+            Документ:
+            <a class="documentget"
+               th:href="@{/pkv/upfr/documentget(id=${z.opfr.dokumentu.id})}"
+               th:text="${z.opfr.dokumentu.nameDokument}"
+               download>
+            </a>
+        </div> <!--th:name="${z.opfr.dokumentu}"-->
+
+<!--        <div class="col s12 center" th:if="${z.dokumentzayav} == null" th:text="'Заявление: -'">
+        </div>
+
+        <div th:unless="${z.dokumentzayav} == null" class="col s12 center">&lt;!&ndash;th:text="'Заявление: ' ">&ndash;&gt;
+            Заявление:
+            <a class="documentgetz"
+               th:href="@{/pkv/upfr/documentgetz(id=${z.dokumentzayav.idDokumentzayav})}"
+               th:text="${z.dokumentzayav.nameFile}"
+               download>
+            </a>
+        </div>-->
+
+        <table>
+            <tr>
+                <th align="center">КБК</th>
+                <th align="center">Вид платежа</th>
+                <th align="center">Сумма</th>
+            </tr>
+            <tr th:each="kbk : ${z.kbkVids}">
+                <td th:text="${kbk.asvKbk.kbkCode}">
+                </td>
+                <td th:text="${kbk.asvKbk.getKbkShortName(20)}">
+                </td>
+                <td th:text="${kbk.summ2}">
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div th:fragment="rech(z.id)">
+    <div class="row rechdan" th:name="${z.id}">
+        <div class="col s12 center">
+            <div class="row">
+                <div class="col s6 center">
+                    Номер решения:
+                </div>
+                <div class="col s6 center">
+                    <input type='text' name='nom_rech' maxlength="50" placeholder="Номер решения"
+                           title="Номер решения" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s6 center">
+                    Дата решения:
+                </div>
+                <div class="col s6 center">
+                    <input type='date' name='data_rech' maxlength="20" placeholder="Дата решения"
+                           title="Дата решения" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s6 center">
+                    <a class="waves-effect waves-light btn" th:id="${z.id}" name="rechnull">Не принято</a>
+                </div>
+                <div class="col s6 center">
+                    <a class="waves-effect waves-light btn" th:id="${z.id}" name="buttonrech">Добавить решения</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

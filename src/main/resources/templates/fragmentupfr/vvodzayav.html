@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<body>
+
+<div th:fragment="vvodzayav">
+
+    <div class="col s3">
+    </div>
+    <div class="col">
+        <div class="row">
+            <div class="col s12 center-align">
+                Внести данные из заявления плательщика
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s6 right-align">
+                Регистрационный номер:
+            </div>
+            <div class="col s6">
+                <div class="row">
+                    <div class="col s10">
+                        <input placeholder="Введите регистрационный номер" name='regnom' type="text"
+                               class="validate"
+                               pattern="\d+" maxlength="20">
+                    </div>
+                    <div class="col s2">
+                        <a id="searchregnom" class="waves-effect waves-light btn">🔍</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s6 right-align">
+                Наименование/ФИО плательщика:
+            </div>
+            <div class="col s6">
+                <input placeholder="Введите наименование плательщика" name='fio' type="text" class="validate"
+                       maxlength="200">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s6 right-align">
+                ИНН:
+            </div>
+            <div class="col s6">
+                <input placeholder="Введите ИНН" name='inn' type="text" class="validate"
+                       maxlength="12" pattern="^([0-9]{10})|([0-9]{12})$">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s6 right-align">
+                КПП:
+            </div>
+            <div class="col s6">
+                <input placeholder="Введите КПП" name='kpp' type="text" class="validate"
+                       maxlength="9" pattern="^[0-9]{9}$">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s6 right-align">
+                Дата заявления:
+            </div>
+            <div class="col s6">
+                <input placeholder="Нажмите для выбора даты" name='data' type="text"
+                       pattern="^\d\d\.\d\d\.\d\d\d\d$"
+                       class="datepicker validate">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s6 right-align">
+                Заявление:
+            </div>
+            <div class="col s6 center">
+                <!--th:name="${z.id}"-->
+                <a class="waves-effect waves-light btn modal-trigger"
+                   id="vvvodzayav"
+                   href="#modaldokumentzayav">
+                    Выбрать
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div th:fragment="upfrkbksum">
+    <div class="col s2"></div>
+    <div class="col s8">
+        <div class="row">
+            <div class="col s4 center-align">КБК</div>
+            <div class="col s4 center-align">Вид платежа</div>
+            <div class="col s4 center-align">Сумма</div>
+        </div>
+        <div class="row">
+            <div class="col s12" id="kbk1">
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s4 center-align">
+                <a class="waves-effect waves-teal btn-flat modal-trigger" href="#modalkbkvib">Выберите КБК</a>
+            </div>
+            <div class="hide">
+                <input type="text" id="textkbk"/>
+            </div>
+            <div class="input-field col s4 center-align">
+                <a class="waves-effect waves-teal btn-flat modal-trigger " href="#modalvidplatvib">-</a>
+            </div>
+            <div class="col s3">
+                <input placeholder="Введите сумму:" name='summ' id="isumm" type="text" class="validate"
+                       maxlength="12" pattern="\d+(\.\d+)?">
+            </div>
+            <div class="col s1">
+                <a id="setkbk" class="waves-effect waves-light btn">+</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s3"></div>
+            <div class="col s6 right-align waves-effect waves-light btn red lighten-2 " id="inputall">
+                Добавить в БД
+            </div>
+        </div>
+    </div>
+
+    <div id="modalkbkvib" class="modal">
+
+        <div class="modal-content center-align">
+            <h4>Выберите КБК</h4>
+        </div>
+
+        <div class="row" id="editkbk">
+            <div class="col s3">
+            </div>
+            <div class="center-align input-field col s6">
+                <input id="input_kbk" type="text" class="validate">
+                <label for="input_kbk">Поиск КБК</label>
+            </div>
+        </div>
+
+        <div class="row" id="containerkbk"></div>
+
+        <div id="pagination" th:include="fragmentupfr/vvodzayav :: pagination"></div>
+
+    </div>
+
+</div>
+
+<div th:fragment="containerkbk">
+
+    <div class="col s12 center-align">
+        <div th:each="asvKbk : ${asvKbks}"
+             class="row">
+
+            <div class="col s6">
+                <a class="waves-effect waves-teal btn-flat" th:text="${asvKbk.kbkCode}"
+                   th:value="${asvKbk.kbkId} + '|' + ${asvKbk.kbkCode} + '|' + ${asvKbk.kbkShortName}">
+                </a>
+            </div>
+            <div class="col s6" th:attr="title=${asvKbk.kbkFullName}" th:text="${asvKbk.getKbkFullName(50)}">
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div th:fragment="pagination">
+    <ul class="pagination row">
+        <li class="disabled col s2"><a>Назад</a></li>
+        <li class="waves-effect active col s1"><a>1</a></li>
+        <li class="waves-effect col s1"><a>2</a></li>
+        <li class="waves-effect col s1"><a>3</a></li>
+        <li class="waves-effect col s1"><a>4</a></li>
+        <li class="waves-effect col s1"><a>5</a></li>
+        <li class="waves-effect col s2"><a>Далее</a></li>
+    </ul>
+</div>
+
+<div th:fragment="upfrhistory(zayavs)">
+    <table>
+        <tr>
+            <td colspan="10">Все заявления</td>
+        </tr>
+        <tr>
+            <td align="center">Рег. номер</td>
+            <td align="center">Наименование</td>
+            <td align="center">ИНН</td>
+            <td align="center">КПП</td>
+            <td align="center">Дата заявления</td>
+            <td align="center">КБК</td>
+            <td align="center">Вид платежа</td>
+            <td align="center">Сумма</td>
+            <td align="center">Статус</td>
+            <td align="center">Действие</td>
+        </tr>
+        <tr th:each="z : ${zayavs}" th:attr="name=${z.id}">
+            <td th:text="${z.regnum}">
+            </td>
+            <td th:text="${z.name}">
+            </td>
+            <td th:text="${z.inn}">
+            </td>
+            <td th:text="${z.kpp}">
+            </td>
+            <td th:text="${z.date_zaya}">
+            </td>
+
+            <td>
+                <div th:each="k : ${z.kbkVids}" th:text="${k.asvKbk.kbkCode}">
+                </div>
+            </td>
+            <td>
+                <div th:each="k : ${z.kbkVids}" th:text="${k.asvKbk.kbkShortName}">
+                </div>
+            </td>
+            <td>
+                <div th:each="k : ${z.kbkVids}" th:text="${k.summ1}">
+                </div>
+            </td>
+            <td th:text="${z.stat.stat}">
+            </td>
+            <td>
+                <a name="delzayav" th:id="${z.id}"
+                   class="red waves-effect waves-light btn">X</a>
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+</body>
+</html>

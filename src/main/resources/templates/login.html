@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>Авторизация</title>
+
+</head>
+<body>
+<!--<div th:if="${param.error}">
+    Invalid username and password.
+</div>
+<div th:if="${param.logout}">
+    You have been logged out.
+</div>-->
+<form th:action="@{/pkv/login}" method="post">
+
+    <div th:if="${param.error}">
+        Неверное имя пользователя или пароль.
+    </div>
+    <div th:if="${param.logout}">
+        Вы вышли из системы.
+    </div>
+
+    <div><label> User Name : <input type="text" name="username"/> </label></div>
+    <div><label> Password: <input type="password" name="password"/> </label></div>
+    <div><input type="submit" value="Sign In"/></div>
+</form>
+
+</body>
+</html>
+
+<!--
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <link type="text/css" rel="stylesheet" href="../materialize/css/materialize.min.css" media="screen,projection"/>
+    <title>ПК Возвраты</title>
+</head>
+<body>
+<form action="/login" method="post">
+
+    <div class="row">
+        <div class="input-field col s4 offset-s4">
+            <input placeholder="Введите логин" name='login' id="first_name" type="text" class="validate">
+            <label for="first_name">Логин</label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="input-field col s4 offset-s4">
+            <input name='password' id="password" type="password" class="validate">
+            <label for="password">Пароль</label>
+        </div>
+    </div>
+
+    <div class="row center-align">
+        <div class="input-field col s2 offset-s5">
+            <button class="btn waves-effect waves-light" type='submit' title='Вход'>Вход</button>
+        </div>
+    </div>
+
+</form>
+</body>
+</html>-->
+
+

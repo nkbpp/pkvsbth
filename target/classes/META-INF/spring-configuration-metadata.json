@@ -1,0 +1,18 @@
+{
+  "groups": [
+    {
+      "name": "asv.spring.datasource",
+      "type": "javax.sql.DataSource",
+      "sourceType": "ru.pfr.configuration.AsvDS",
+      "sourceMethod": "dataSource()"
+    },
+    {
+      "name": "pkv.spring.datasource",
+      "type": "javax.sql.DataSource",
+      "sourceType": "ru.pfr.configuration.PkvDS",
+      "sourceMethod": "dataSource()"
+    }
+  ],
+  "properties": [],
+  "hints": []
+}

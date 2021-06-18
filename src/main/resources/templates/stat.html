@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Статистика</title>
+    <script type="text/javascript" src="/webjars/jquery/3.3.1/jquery.js"></script>
+    <link type="text/css" rel="stylesheet" href="/webjars/materialize/1.0.0-rc.2/dist/css/materialize.min.css"/>
+    <script type="text/javascript" src="/webjars/materialize/1.0.0-rc.2/dist/js/materialize.min.js"></script>
+    <style>
+        table {
+            margin: 0px;
+            padding: 0px;
+            border-collapse: collapse; /*убираем пустые промежутки между ячейками*/
+            border: 2px solid grey; /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+        }
+        th {
+            text-align: center;
+            border-collapse: collapse; /*убираем пустые промежутки между ячейками*/
+            border: 2px solid grey; /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+        }
+        tr {
+            margin: 0px;
+            padding: 0px;
+        }
+        td {
+            margin: 0px;
+            padding: 5px;
+            text-align: center;
+            border-collapse: collapse; /*убираем пустые промежутки между ячейками*/
+            border: 2px solid grey; /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+        }
+    </style>
+</head>
+
+<body>
+<div th:insert="fragment/logout :: logout(${user})"></div>
+
+<div class="row" th:if="${user.rayon.kod.equals('000')}">
+    <div class="col s12">
+        <a th:href="@{/pkv/opfr}">
+            Назад
+        </a>
+    </div>
+</div>
+
+<table align="center" width="100%" border="1" cellspacing="0">
+    <tr>
+        <th colspan="8">Сводный отчет по возвратам</th>
+    </tr>
+    <tr>
+        <td rowspan="2">№</td>
+        <td rowspan="2">Код района</td>
+        <td rowspan="2">Наименование района</td>
+        <td colspan="2">Заявлений плательщиков</td>
+        <td rowspan="2">Кол-во запросов в ФНС</td>
+        <td rowspan="2">Кол-во ответов от ФНС</td>
+        <td rowspan="2">Кол-во решений</td>
+    </tr>
+    <tr>
+
+        <td>Кол-во</td>
+        <td>Сумма</td>
+
+    </tr>
+
+    <tr th:each="l : ${logi}">
+        <td th:text="${l.date}">
+        </td>
+        <td th:text="${l.user}">
+        </td>
+        <td th:text="${l.type}">
+        </td>
+        <td th:text="${l.text}">
+        </td>
+    </tr>
+
+    <tr th:each="s,iterStat : ${statistika}">
+        <td th:text="${iterStat.count}">
+        </td>
+        <td th:text="${s.kod}">
+        </td>
+        <td th:text="${s.namerayon}">
+        </td>
+        <td th:text="${s.kolvo}">
+        </td>
+        <td th:text="${s.summa}">
+        </td>
+        <td th:text="${s.s2}">
+        </td>
+        <td th:text="${s.s3}">
+        </td>
+        <td th:text="${s.s4}">
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="3">Итого по области</td>
+        <td th:text="${s1[0]}"></td>
+        <td th:text="${d}"></td>
+        <td th:text="${s1[1]}"></td>
+        <td th:text="${s1[2]}"></td>
+        <td th:text="${s1[3]}"></td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>pkv</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
+    <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link type="text/css" rel="stylesheet" href="/webjars/materialize/1.0.0-rc.2/dist/css/materialize.min.css"/>
+    <style>
+        [name="logout"] div{
+            margin: 0px;
+            padding: 0px;
+        }
+
+        form{
+            padding-bottom: 5px;
+        }
+
+        #filter{
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #filter div.row {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #filter div.col {
+            padding-left: 5px;
+            text-align: center;
+            vertical-align: middle;
+            horiz-align: center;
+
+        }
+        #rb {
+            margin: 0px;
+            padding: 0px;
+            text-align: center;
+            vertical-align: middle;
+            horiz-align: center;
+        }
+
+        table {
+            margin: 0px;
+            padding: 0px;
+            border-collapse: collapse; /*убираем пустые промежутки между ячейками*/
+            border: 2px solid grey; /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+        }
+        th {
+            text-align: center;
+            border-collapse: collapse; /*убираем пустые промежутки между ячейками*/
+            border: 2px solid grey; /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+        }
+        tr {
+            margin: 0px;
+            padding: 0px;
+        }
+        td {
+            margin: 0px;
+            padding: 5px;
+            text-align: center;
+            border-collapse: collapse; /*убираем пустые промежутки между ячейками*/
+            border: 2px solid grey; /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+        }
+        [name="opfr"] div {
+            margin: 0px;
+            padding: 0px;
+            vertical-align: middle;
+            horiz-align: center;
+            text-align: center;
+        }
+        [name="opfr"] div.row {
+            margin-bottom: 3px;
+        }
+        input {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #pagination2 {
+            vertical-align: middle;
+            horiz-align: center;
+            text-align: center;
+        }
+
+/*        [name="opfr"] table td {
+            width: 500px;
+            !*height: 1000px;*!
+        }*/
+    </style>
+    <script type="text/javascript" src="/webjars/jquery/3.3.1/jquery.js"></script>
+    <script type="text/javascript">
+
+        function clearPagination2() { // определяем функцию и ее механизм выполнения
+            $("#pagination2 a").first().parent().removeClass("disabled").addClass("disabled");
+            $("#pagination2 a").eq(1).text("1").parent().removeClass("active").addClass("active");
+            $("#pagination2 a").eq(2).text("2").parent().removeClass("active");
+            $("#pagination2 a").eq(3).text("3").parent().removeClass("active");
+            $("#pagination2 a").eq(4).text("4").parent().removeClass("active");
+            $("#pagination2 a").eq(5).text("5").parent().removeClass("active");
+        }
+
+        $(document).ready(function () {
+            $('#rayfilter').formSelect();
+            $('#stat').formSelect();
+            $('#modaldokumentzayav').modal();
+            $('#modaldokument').modal();
+            $('#div_modal_form_insertz').modal();
+            $('#div_modal_form_insert').modal();
+            //переключатели страниц снизу
+            $("#pagination2").on('click', 'a', function () {
+                var list;
+                //кнопка назад
+                if ($(this).text() == "Назад") {
+                    clearPagination2();
+                    list = 1;
+                } else //кнопка далее
+                if ($(this).text() == "Далее") {
+                    list = +$("#pagination2 a").eq(5).text()+1;
+                    $("#pagination2 a").first().parent().removeClass("disabled");
+                    $("#pagination2 a").eq(1).text(list).parent().removeClass("active").addClass("active");
+                    $("#pagination2 a").eq(2).text(+list + 1).parent().removeClass("active");
+                    $("#pagination2 a").eq(3).text(+list + 2).parent().removeClass("active");
+                    $("#pagination2 a").eq(4).text(+list + 3).parent().removeClass("active");
+                    $("#pagination2 a").eq(5).text(+list + 4).parent().removeClass("active");
+                } else {
+                    $("#pagination2 li.active").removeClass("active");
+                    $(this).parent().addClass("active");
+                    list = $(this).text();
+                    if (list == 1) {
+                        $("#pagination2 a").first().parent().removeClass("disabled").addClass("disabled");
+                    } else {
+                        $("#pagination2 li.disabled").removeClass("disabled");
+                    }
+                }
+
+                var param = "list=" + list +
+                    "&reg=" + $("#regnomfilter").val() +
+                    "&inn=" + $("#innfilter").val() +
+                    "&kodRayon=" + $("#rayfilter").val() +
+                    "&stat=" + (($("#rb1").is(":checked"))?"1":"2");
+                    console.log("param=" + param);
+                $("#opfrhistory").load("/pkv/opfr/rb", param);
+
+            });
+
+            //переключатели статуса
+            $("#rb").on('click', 'input', function () {
+                var param = "list=1" +
+                    "&reg=" + $("#regnomfilter").val() +
+                    "&inn=" + $("#innfilter").val() +
+                    "&kodRayon=" + $("#rayfilter").val();
+                clearPagination2();
+                if ($(this).attr("id") == "rb1") {
+                    param +="&stat=1";
+                }
+                if ($(this).attr("id") == "rb2") {
+                    param +="&stat=2";
+                }
+                //console.log(param);
+                $("#opfrhistory").load("/pkv/opfr/rb", param);
+            });
+
+            //применить фильтр
+            $("#filter").on('click', 'a', function () {
+                if ($(this).attr('id') == "filtergo") {
+                    var param = "list=1" +
+                        "&reg=" + $("#regnomfilter").val() +
+                        "&inn=" + $("#innfilter").val() +
+                        "&kodRayon=" + $("#rayfilter").val()+
+                        "&stat=" + (($("#rb1").is(":checked"))?"1":"2");
+                    clearPagination2();
+                    console.log("param1=" + param);
+                    $("#opfrhistory").load("/pkv/opfr/rb", param);
+                }
+            });
+
+            //переключатели страниц в модальном окне
+            $("#pagination").on('click', 'a', function () {
+                var list;
+                //кнопка назад
+                if ($(this).text() == "Назад") {
+                    $("#pagination a").first().parent().removeClass("disabled").addClass("disabled");
+                    $("#pagination a").eq(1).text("1").parent().removeClass("active").addClass("active");
+                    $("#pagination a").eq(2).text("2").parent().removeClass("active");
+                    $("#pagination a").eq(3).text("3").parent().removeClass("active");
+                    $("#pagination a").eq(4).text("4").parent().removeClass("active");
+                    $("#pagination a").eq(5).text("5").parent().removeClass("active");
+                    list = 1;
+                } else //кнопка далее
+                if ($(this).text() == "Далее") {
+                    list = +$("#pagination a").eq(5).text()+1;
+                    $("#pagination a").first().parent().removeClass("disabled");
+                    $("#pagination a").eq(1).text(list).parent().removeClass("active").addClass("active");
+                    $("#pagination a").eq(2).text(+list + 1).parent().removeClass("active");
+                    $("#pagination a").eq(3).text(+list + 2).parent().removeClass("active");
+                    $("#pagination a").eq(4).text(+list + 3).parent().removeClass("active");
+                    $("#pagination a").eq(5).text(+list + 4).parent().removeClass("active");
+                } else {
+                    $("#pagination li.active").removeClass("active");
+                    $(this).parent().addClass("active");
+                    list = $(this).text();
+                    if (list == 1) {
+                        $("#pagination a").first().parent().removeClass("disabled").addClass("disabled");
+                    } else {
+                        $("#pagination li.disabled").removeClass("disabled");
+                    }
+                }
+
+                var param = "list=" + list;
+                $("#dliazamenyz").load("/pkv/opfr/containerdocz", param);
+            });
+
+            //переключатели страниц в модальном окне
+            $("#pagination3").on('click', 'a', function () {
+                var list;
+                //кнопка назад
+                if ($(this).text() == "Назад") {
+                    $("#pagination3 a").first().parent().removeClass("disabled").addClass("disabled");
+                    $("#pagination3 a").eq(1).text("1").parent().removeClass("active").addClass("active");
+                    $("#pagination3 a").eq(2).text("2").parent().removeClass("active");
+                    $("#pagination3 a").eq(3).text("3").parent().removeClass("active");
+                    $("#pagination3 a").eq(4).text("4").parent().removeClass("active");
+                    $("#pagination3 a").eq(5).text("5").parent().removeClass("active");
+                    list = 1;
+                } else //кнопка далее
+                if ($(this).text() == "Далее") {
+                    list = +$("#pagination3 a").eq(5).text()+1;
+                    $("#pagination3 a").first().parent().removeClass("disabled");
+                    $("#pagination3 a").eq(1).text(list).parent().removeClass("active").addClass("active");
+                    $("#pagination3 a").eq(2).text(+list + 1).parent().removeClass("active");
+                    $("#pagination3 a").eq(3).text(+list + 2).parent().removeClass("active");
+                    $("#pagination3 a").eq(4).text(+list + 3).parent().removeClass("active");
+                    $("#pagination3 a").eq(5).text(+list + 4).parent().removeClass("active");
+                } else {
+                    $("#pagination3 li.active").removeClass("active");
+                    $(this).parent().addClass("active");
+                    list = $(this).text();
+                    if (list == 1) {
+                        $("#pagination3 a").first().parent().removeClass("disabled").addClass("disabled");
+                    } else {
+                        $("#pagination3 li.disabled").removeClass("disabled");
+                    }
+                }
+
+                var param = "list=" + list;
+                $("#dliazameny").load("/pkv/opfr/containerdoc", param);
+            });
+
+            //добавить в опфр
+            $("#opfrhistory").on('click', 'a', function () {
+                //статус 1
+                if ($(this).attr("name") == "rb1go") {
+                    var id = $(this).attr("id");
+                    var nom_zap = $(this).closest("td").find("[name='nom_zap']").val();
+                    var data_otprav = $(this).closest("td").find("[name='data_otprav']").val();
+                    var doc = $(this).closest("td").find("[href='#modaldokumentzayav']").attr("value");
+                    var param = "zid="+id+
+                        "&nomzap="+nom_zap+
+                        "&dataotprav="+data_otprav+
+                        "&doc="+doc+
+                    //фильтр
+                    "&reg=" + $("#regnomfilter").val() +
+                    "&inn=" + $("#innfilter").val() +
+                    "&kodRayon=" + $("#rayfilter").val();
+                    clearPagination2();
+                    $("#opfrhistory").load("/pkv/opfr/addupfr", param);
+                }
+                //статус 2
+                if ($(this).attr("name") == "rb2go") {
+                    var id = $(this).attr("id");
+                    var nom_otv = $(this).closest("td").find("[name='nom_otv']").val();
+                    var data_otv = $(this).closest("td").find("[name='data_otv']").val();
+                    var doc = $(this).closest("td").find("[href='#modaldokument']").attr("value");
+                    var s = "";
+                    $(this).closest("td").find("table").find("input").each(function () {
+                        s+=($(this).attr("name")+";");
+                        s+=($(this).val()+";");
+                    });
+                    var param = "zid=" + id +
+                        "&nomotv=" + nom_otv +
+                        "&dataotv=" + data_otv +
+                        "&doc=" + doc +
+                        "&sum=" + s.slice(0,-1) + //удалить последний символ
+                            //фильтр
+                        "&reg=" + $("#regnomfilter").val() +
+                        "&inn=" + $("#innfilter").val() +
+                        "&kodRayon=" + $("#rayfilter").val();
+                    clearPagination2();
+                    $("#opfrhistory").load("/pkv/opfr/updateupfr", param);
+                }
+                //печать запроса
+                if ( $(this).attr("name") == "zapvfns") {
+                    console.log("zapvfns");
+                }
+                //Выбор документа
+                if ( $(this).attr("href") == "#modaldokumentzayav"){
+                    $("#iddoc").val($(this).attr("name"));
+                    console.log("Выбор документа");
+                }
+                //Выбор документа2
+                if ( $(this).attr("href") == "#modaldokument"){
+                    $("#iddoc2").val($(this).attr("name"));
+                    console.log("Выбор документа2");
+                }
+            });
+
+            /*кнопка выбрать в модальной форме*/ //???????????????????????
+            $("#modaldokumentzayav").on('click', 'a', function () {
+                if ($(this).hasClass("vibdoc")) {
+                    $("#iddoc").val();
+                    $("#opfrhistory [name='"+$("#iddoc").val()+"']").text($(this).closest("tr").find("td:first").text());
+                    $("#opfrhistory [name='"+$("#iddoc").val()+"']").attr("value",$(this).attr("id"));
+                    console.log("vibdoc");
+                    $('#modaldokumentzayav').modal('close');
+                    return false;
+                }
+            });
+            $("#modaldokument").on('click', 'a', function () {
+                if ($(this).hasClass("vibdoc")) {
+                    $("#iddoc2").val();
+                    $("#opfrhistory [name='"+$("#iddoc2").val()+"']").text($(this).closest("tr").find("td:first").text());
+                    $("#opfrhistory [name='"+$("#iddoc2").val()+"']").attr("value",$(this).attr("id"));
+                    $('#modaldokument').modal('close');
+                    return false;
+                }
+            });
+
+            //ЗАГРУЗКА ФАЙЛОВ
+            // обработка и отправка AJAX запроса при клике на кнопку upload_files
+            $("#butdocins").on('click', function (event) { //документ заяв
+
+                var token = $('#_csrf').attr('content');
+                var header = $('#_csrf_header').attr('content');
+
+                var data = new FormData();
+                jQuery.each(jQuery('#filedoc')[0].files, function (i, file) {
+                    data.append('file', file);
+                });
+                data.append('description', $("#description").val());
+                console.log("data= "+ data);
+
+                var form = $("#addDocumentForm");
+                $.ajax({
+                    type : "POST",
+                    url : form.attr("action"),
+                    data : data,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    type: 'POST',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader(header, token);
+                    },
+
+                    success: function() {
+                        $("#description").val("");
+                        $('#filedoc').val("");
+
+                        $("#pagination a").first().parent().removeClass("disabled").addClass("disabled");
+                        $("#pagination a").eq(1).text("1").parent().removeClass("active").addClass("active");
+                        $("#pagination a").eq(2).text("2").parent().removeClass("active");
+                        $("#pagination a").eq(3).text("3").parent().removeClass("active");
+                        $("#pagination a").eq(4).text("4").parent().removeClass("active");
+                        $("#pagination a").eq(5).text("5").parent().removeClass("active");
+                        var list = 1;
+                        var param = "list=" + list;
+                        $("#dliazamenyz").load("/pkv/opfr/containerdocz", param);
+                        $('#div_modal_form_insert').modal('close');
+                    },
+                    error: function(request, status, error) {
+                        alert("request= "+request+
+                            "\nstatus= "+status+
+                            "\nerror= "+error
+                        );
+                    }
+                });
+                return;
+            });
+
+            // обработка и отправка AJAX запроса при клике на кнопку upload_filesZ
+            $("#butdocinsz").on('click', function (event) {
+                var token = $('#_csrf').attr('content');
+                var header = $('#_csrf_header').attr('content');
+
+                var data = new FormData();
+                jQuery.each(jQuery('#filedocz')[0].files, function (i, file) {
+                    data.append('file', file);
+                });
+                data.append('description', $("#descriptionz").val());
+                console.log("data2= "+ data);
+
+                var form = $("#addDocumentzForm");
+                $.ajax({
+                    type : "POST",
+                    url : form.attr("action"),
+                    data : data,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    type: 'POST',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader(header, token);
+                    },
+
+                    success: function() {
+                        $("#descriptionz").val("");
+                        $('#filedocz').val("");
+
+                        $("#pagination3 a").first().parent().removeClass("disabled").addClass("disabled");
+                        $("#pagination3 a").eq(1).text("1").parent().removeClass("active").addClass("active");
+                        $("#pagination3 a").eq(2).text("2").parent().removeClass("active");
+                        $("#pagination3 a").eq(3).text("3").parent().removeClass("active");
+                        $("#pagination3 a").eq(4).text("4").parent().removeClass("active");
+                        $("#pagination3 a").eq(5).text("5").parent().removeClass("active");
+                        var list = 1;
+                        var param = "list=" + list;
+                        $("#dliazameny").load("/pkv/opfr/containerdoc", param);
+                        $('#div_modal_form_insertz').modal('close');
+                        console.log("все ок");
+                    },
+                    error: function(request, status, error) {
+                        alert("request= "+request+
+                            "\nstatus= "+status+
+                            "\nerror= "+error
+                        );
+                    }
+                });
+                return;
+            });
+
+        });
+    </script>
+</head>
+<body>
+    <div th:insert="fragment/logout :: logout(${user})"></div>
+
+    <div class="row" th:if="${user.rayon.kod.equals('000')}">
+        <div class="col s6" align="center">
+            <a th:href="@{/pkv/upfr}">
+                Внести данные от пользователя УПФР
+            </a>
+        </div>
+        <div class="col s6" align="center">
+            <a th:href="@{/pkv/opfr/stat}">
+                Статистика
+            </a>
+        </div>
+    </div>
+
+    <div class="row" id="filter">
+        <div class="input-field col s3">
+            <select id="rayfilter">
+                <option value="" selected>Все районы</option>
+                <option th:each="r : ${rayon}"  th:value="${r.kod}" th:text="${r.namerayon}"></option>
+            </select>
+            <label>Выбор района</label>
+        </div>
+        <div class="col s3">
+            <label for="regnomfilter">Регистрационный номер</label>
+            <input placeholder="Регистрационный номер" id="regnomfilter" type="text">
+        </div>
+        <div class="col s3">
+            <label for="innfilter">ИНН</label>
+            <input placeholder="ИНН" id="innfilter" type="text">
+        </div>
+        <div class="col s3">
+            <a class="waves-effect waves-light btn" id="filtergo">Применить фильтр</a>
+        </div>
+    </div>
+
+    <div id="rb" class="row">
+        <div class="col s6">
+            <label>
+                <input id="rb1" name="group1" type="radio" checked />
+                <span>Отправить в ФНС</span>
+            </label>
+        </div>
+        <div class="col s6">
+            <label>
+                <input id="rb2" name="group1" type="radio" />
+                <span>Внести ответ из ФНС</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="row" id="opfrhistory" th:include="fragmentupfr/opfrfrag :: opfrhistory(${zayavs})"></div>
+
+    <div id="pagination2" th:include="fragmentupfr/vvodzayav :: pagination"></div>
+
+    <div id="modaldokumentzayav" class="modal" th:include="fragmentupfr/opfrfrag :: modaldokumentzayav(${dokumentzayav})">
+    </div>
+    <div id="modaldokument" class="modal" th:include="fragmentupfr/opfrfrag :: modaldokument(${dokument})">
+    </div>
+
+    <!--pagination-->
+    <div id="div_modal_form_insert" class="modal">
+        <div class="modal-content">
+            <h4>Добавить файл</h4>
+            <form method="POST"
+                  th:action="@{/pkv/opfr/dokumentinsertz}" enctype="multipart/form-data"
+                  id="addDocumentForm" class="row">
+                <div class="col s12">
+                    <div class="row">
+                        <div class="col s12">
+                            <label for="description">Введите имя файла</label>
+                            <input placeholder="Имя файла" name="description" id="description" type="text">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12">
+                            <input placeholder="Имя файла" name="file" id="filedoc" type="file" accept=".docx,.doc">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <a id='butdocins' class="modal-close waves-effect waves-green btn-flat">Добавить</a>
+        </div>
+    </div>
+<!--pagination3-->
+    <div id="div_modal_form_insertz" class="modal">
+        <div class="modal-content">
+            <h4>Добавить файл</h4>
+            <form method="POST"
+                  th:action="@{/pkv/opfr/dokumentinsert}"
+                  enctype="multipart/form-data"
+                  id="addDocumentzForm" class="row">
+                <div class="col s12">
+                    <div class="row">
+                        <div class="col s12">
+                            <label for="descriptionz">Введите имя файла</label>
+                            <input placeholder="Имя файла"
+                                   name="descriptionz"
+                                   id="descriptionz"
+                                   type="text">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s12">
+                            <input placeholder="Имя файла"
+                                   name="filez"
+                                   id="filedocz"
+                                   type="file"
+                                   accept=".docx,.doc">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <a id='butdocinsz' class="modal-close waves-effect waves-green btn-flat">Добавить</a>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="/webjars/materialize/1.0.0-rc.2/dist/js/materialize.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="jpa" name="JPA">
+      <configuration>
+        <setting name="validation-enabled" value="true" />
+        <setting name="provider-name" value="Hibernate" />
+        <datasource-mapping>
+          <factory-entry name="Entities" />
+          <factory-entry name="asvEntityManager" value="e58ea285-df8c-4432-8fe6-ba2fc4117a15" />
+          <factory-entry name="entityManagerFactory" value="e58ea285-df8c-4432-8fe6-ba2fc4117a15" />
+          <factory-entry name="noname-a.xml@0" value="0820d622-c7fb-4a84-8374-a2f5ca926f8d" />
+          <factory-entry name="pkvEntityManager" value="e58ea285-df8c-4432-8fe6-ba2fc4117a15" />
+        </datasource-mapping>
+        <naming-strategy-map />
+      </configuration>
+    </facet>
+  </component>
+</module>

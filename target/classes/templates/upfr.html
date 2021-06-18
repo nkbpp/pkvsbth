@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>pkv</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
+    <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link type="text/css" rel="stylesheet" href="/webjars/materialize/1.0.0-rc.2/dist/css/materialize.min.css"/>
+    <style>
+
+        /*
+            text-align: center;
+            vertical-align: middle;
+            horiz-align: center;
+        */
+        [name="logout"] div{
+            margin: 0px;
+            padding: 0px;
+        }
+
+        form{
+            padding-bottom: 5px;
+        }
+
+        #vvodzayav div.row {
+            margin: 0px;
+            padding: 0px;
+        }
+        #vvodzayav div.right-align {
+
+        }
+
+        #upfrkbksum div.row {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #upfrhistory table {
+            margin: 0px;
+            padding: 0px;
+            border-collapse: collapse; /*убираем пустые промежутки между ячейками*/
+            border: 2px solid grey; /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+        }
+
+        #upfrhistory th {
+            text-align: center;
+            border-collapse: collapse; /*убираем пустые промежутки между ячейками*/
+            border: 2px solid grey; /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+        }
+
+        #upfrhistory tr {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #upfrhistory td {
+            margin: 0px;
+            padding: 5px;
+            text-align: center;
+            border-collapse: collapse; /*убираем пустые промежутки между ячейками*/
+            border: 2px solid grey; /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+        }
+
+
+    </style>
+    <script type="text/javascript" src="/webjars/jquery/3.3.1/jquery.js"></script>
+    <script type="text/javascript">
+
+        function clearPagination2() { // определяем функцию и ее механизм выполнения
+            $("#pagination2 a").first().parent().removeClass("disabled").addClass("disabled");
+            $("#pagination2 a").eq(1).text("1").parent().removeClass("active").addClass("active");
+            $("#pagination2 a").eq(2).text("2").parent().removeClass("active");
+            $("#pagination2 a").eq(3).text("3").parent().removeClass("active");
+            $("#pagination2 a").eq(4).text("4").parent().removeClass("active");
+            $("#pagination2 a").eq(5).text("5").parent().removeClass("active");
+        }
+
+        function clearPagination() { // определяем функцию и ее механизм выполнения
+            $("#pagination a").first().parent().removeClass("disabled").addClass("disabled");
+            $("#pagination a").eq(1).text("1").parent().removeClass("active").addClass("active");
+            $("#pagination a").eq(2).text("2").parent().removeClass("active");
+            $("#pagination a").eq(3).text("3").parent().removeClass("active");
+            $("#pagination a").eq(4).text("4").parent().removeClass("active");
+            $("#pagination a").eq(5).text("5").parent().removeClass("active");
+        }
+
+        $(document).ready(function () {
+
+            $('.datepicker').on('mousedown',function(event){
+                event.preventDefault();
+            })
+
+            $('#statfilter').formSelect();
+            //выбор kbk
+            $('#modalkbkvib').modal();
+
+            //Добавить заявления
+            $('#modaldokumentzayav').modal();
+            $('#div_modal_form_insert').modal();
+
+            $('.tabs').tabs();
+
+
+            $("#vvodzayav").on('click', 'a', function () {
+                //Автозаполнение из АСВ
+                if ($(this).attr('id') == "searchregnom") {
+                    var param = "/pkv/upfr/searchregnom/" + $("input[name='regnom']").val();
+                    $.ajax({
+                        url: param,
+                        success: function (data) {
+                            $("input[name='regnom']").val(data.insurerRegNum);
+                            $("input[name='fio']").val(data.insurerFullName == null ? data.insurerCompName : data.insurerFullName);
+                            $("input[name='inn']").val(data.insurerInn);
+                            $("input[name='kpp']").val(data.insurerKpp);
+                            //если пустые данные обработать
+                        }
+                    });
+                }
+
+            });
+
+
+            $('#containerkbk').on('click', 'a', function () {
+                var str = $(this).attr('value').split('|');
+                $('#upfrkbksum a[href="#modalkbkvib"]').html(str[1]).attr('value', str[0]);
+                $('#upfrkbksum a[href="#modalvidplatvib"]').html(str[2]);
+                $('#modalkbkvib').modal('close');
+            });
+
+            $("#upfrkbksum").on('click', 'a', function () {
+
+                if ($(this).attr('id') == "setkbk") {
+                    if ($('#isumm').val() == "" || $('a[href="#modalkbkvib"]').attr('value') === undefined) { //если сумма пуста     СДЕЛАТЬ ПРОВЕРКУ!!!
+                        alert("Не все поля заполнены!");
+                        return;
+                    }
+
+                    var iii = $('a[href="#modalkbkvib"]').attr('value') + ";" +
+                        $('#isumm').val() + ";";
+                    console.log(iii);
+
+                    if ($("div[name='" + iii + "']").attr("name")) {
+                        alert("Такой элемент уже добавлен");
+                    }
+
+                    var tab = "<div class='row' name=" + iii + ">" +
+                        "<div class='col s4 center-align'>" + $('a[href="#modalkbkvib"]').html() + "</div>" +
+                        "<div class='col s4 center-align'>" + $('a[href="#modalvidplatvib"]').html() + "</div>" +
+                        "<div class='col s3 center-align'>" + $('#isumm').val().trim() + "</div>" +
+                        "<div class='col s1 center-align'>" +
+                        "<a name='delkbk' id=" + iii +
+                        " class='red waves-effect waves-light btn'>-</a>" +
+                        "</div>" +
+                        "</div>";
+
+                    //очищение
+                    $('#upfrkbksum a[href="#modalkbkvib"]').html("ВЫБЕРИТЕ КБК");
+                    $('#upfrkbksum a[href="#modalvidplatvib"]').html("-");
+                    $('#isumm').val("");
+
+                    $("#kbk1").html($("#kbk1").html() + tab);//добавить
+
+                    $("#textkbk").val($("#textkbk").val() + iii);
+                }
+
+                if ($(this).attr('href') == "#modalkbkvib") {
+                    var s = "list=1";
+                    $("#containerkbk").load("/pkv/upfr/containerkbk", s);
+                }
+
+                if ($(this).attr('name') == "delkbk") {
+
+                    $("#textkbk").val($("#textkbk").val().replace($(this).attr('id'), ""));
+                    $("div[name='" + $(this).attr('id') + "']").remove();
+
+                }
+            });
+
+            $('#upfrkbksum').on('click', 'div', function () {
+                //добавить в БД
+                if ($(this).attr('id') == "inputall") {
+                    var regnom = $("input[name='regnom']").val();
+                    $("input[name='regnom']").val("");
+                    var fio = $("input[name='fio']").val();
+                    $("input[name='fio']").val("");
+                    var inn = $("input[name='inn']").val();
+                    $("input[name='inn']").val("");
+                    var kpp = $("input[name='kpp']").val();
+                    $("input[name='kpp']").val("");
+                    var data = $("input[name='data']").val();
+                    $("input[name='data']").val("");
+                    var textkbk = $("#textkbk").val();
+                    $("#textkbk").val("");
+                    var doc = $("#vvvodzayav").attr("value");
+                    $("#vvvodzayav").text("ВЫБРАТЬ");
+                    $("#vvvodzayav").removeAttr("value");
+
+                    if (regnom == "" ||
+                        fio == "" ||
+                        inn == "" ||
+                        textkbk == "") {
+                        alert("Не все поля заполнены");
+                        return;
+                    }
+                    var check = $("#checkboxvse").prop("checked") ? true : false;
+                    var param =
+                        "&reg=" + regnom +
+                        "&inn=" + inn +
+                        //"&stat=" + $("#statfilter").val() +
+                        "&kpp=" + kpp +
+                        "&name=" + fio +
+                        "&date_zaya=" + data +
+                        "&textkbk=" + textkbk +
+                        "&doc=" + doc +
+                        "&moi=" + check;
+
+                    $("#upfrhistory").load("/pkv/upfr/addzayav", param);
+
+                    //очистить
+                    $("#kbk1").html("");
+                    clearPagination();
+
+                }
+            });
+
+            //поиск для КБК
+            $("#modalkbkvib").on('keyup', 'input', function () {
+                if (this.getAttribute("id") == "input_kbk") {
+                    var param = "list=1" + "&filter=" + $("#input_kbk").val();
+                    $("#containerkbk").load("/pkv/upfr/containerkbk", param);
+                    clearPagination();
+                }
+            });
+
+            //переключатели страниц в модальном окне
+            $("#pagination").on('click', 'a', function () {
+                var list;
+                //кнопка назад
+                if ($(this).text() == "Назад") {
+                    clearPagination();
+                    list = 1;
+                } else //кнопка далее
+                if ($(this).text() == "Далее") {
+                    list = +$("#pagination a").eq(5).text() + 1;
+                    ;
+                    $("#pagination a").first().parent().removeClass("disabled");
+                    $("#pagination a").eq(1).text(list).parent().removeClass("active").addClass("active");
+                    $("#pagination a").eq(2).text(+list + 1).parent().removeClass("active");
+                    $("#pagination a").eq(3).text(+list + 2).parent().removeClass("active");
+                    $("#pagination a").eq(4).text(+list + 3).parent().removeClass("active");
+                    $("#pagination a").eq(5).text(+list + 4).parent().removeClass("active");
+                } else {
+                    $("#pagination li.active").removeClass("active");
+                    $(this).parent().addClass("active");
+                    list = $(this).text();
+                    if (list == 1) {
+                        $("#pagination a").first().parent().removeClass("disabled").addClass("disabled");
+                    } else {
+                        $("#pagination li.disabled").removeClass("disabled");
+                    }
+                }
+
+                var param = "list=" + list + "&filter=" + $("#input_kbk").val();
+                $("#containerkbk").load("/pkv/upfr/containerkbk", param);
+            });
+
+            //переключатели страниц в upfrhistory
+            $("#pagination2").on('click', 'a', function () {
+                var list;
+                //кнопка назад
+                if ($(this).text() == "Назад") {
+                    clearPagination2();
+                    list = 1;
+                } else //кнопка далее
+                if ($(this).text() == "Далее") {
+                    list = +$("#pagination2 a").eq(5).text() + 1;
+                    $("#pagination2 a").first().parent().removeClass("disabled");
+                    $("#pagination2 a").eq(1).text(list).parent().removeClass("active").addClass("active");
+                    $("#pagination2 a").eq(2).text(+list + 1).parent().removeClass("active");
+                    $("#pagination2 a").eq(3).text(+list + 2).parent().removeClass("active");
+                    $("#pagination2 a").eq(4).text(+list + 3).parent().removeClass("active");
+                    $("#pagination2 a").eq(5).text(+list + 4).parent().removeClass("active");
+                } else {
+                    $("#pagination2 li.active").removeClass("active");
+                    $(this).parent().addClass("active");
+                    list = $(this).text();
+                    if (list == 1) {
+                        $("#pagination2 a").first().parent().removeClass("disabled").addClass("disabled");
+                    } else {
+                        $("#pagination2 li.disabled").removeClass("disabled");
+                    }
+                }
+                var check = $("#checkboxvse").prop("checked") ? true : false;
+                var param = "list=" + list +
+                    "&reg=" + $("#regnomfilter").val() +
+                    "&inn=" + $("#innfilter").val() +
+                    "&stat=" + $("#statfilter").val() +
+                    "&moi=" + check;
+
+                if ($("#tabs1").hasClass("active")) {
+                    $("#upfrhistory").load("/pkv/upfr/historys", param);
+                } else if ($("#tabs2").hasClass("active")) {
+                    //alert("tabs2")
+                    $("#upfrhistory").load("/pkv/upfr/otopfr", param);
+                } else if ($("#tabs3").hasClass("active")) {
+                    $("#upfrhistory").load("/pkv/upfr/rechupfr", param);
+                }
+
+            });
+
+            /*применить фильтр*/
+            $("#filter").on('click', 'a', function () {
+
+                if ($(this).attr('id') == "filtergo") {
+
+                    //var check = $("#checkboxvse").prop("checked") ? 1 : 0;
+
+                    clearPagination2();
+                    var check = $("#checkboxvse").prop("checked") ? true : false;
+                    var param = "list=1" +
+                        "&reg=" + $("#regnomfilter").val() +
+                        "&inn=" + $("#innfilter").val() +
+                        "&stat=" + $("#statfilter").val() +
+                        "&moi=" + check;
+
+                    if ($("#tabs1").hasClass("active")) {
+                        $("#upfrhistory").load("/pkv/upfr/historys", param);
+                    } else if ($("#tabs2").hasClass("active")) {
+                        //alert("tabs2")
+                        $("#upfrhistory").load("/pkv/upfr/otopfr", param);
+                    } else if ($("#tabs3").hasClass("active")) {
+                        $("#upfrhistory").load("/pkv/upfr/rechupfr", param);
+                    }
+
+                    return false;
+                }
+            });
+
+            //менюшка
+            $("#tabs").on('click', 'a', function () {
+                clearPagination2();
+                var check = $("#checkboxvse").prop("checked") ? true : false;
+                console.log("checkboxvse= " + check);
+                var param =
+                    "list=1" +
+                    "&reg=" + $("#regnomfilter").val() +
+                    "&inn=" + $("#innfilter").val() +
+                    "&stat=" + $("#statfilter").val() +
+                    "&moi=" + check;
+                if ($(this).attr('id') == "tabs1") {
+                    $("#upfrhistory").load("/pkv/upfr/historys", param);
+                }
+                if ($(this).attr('id') == "tabs2") {
+                    $("#upfrhistory").load("/pkv/upfr/otopfr", param);
+                }
+                if ($(this).attr('id') == "tabs3") {
+                    $("#upfrhistory").load("/pkv/upfr/rechupfr", param);
+                }
+            });
+
+            $("#tabs").on('click', 'input', function () {
+                clearPagination2();
+                if ($(this).attr('id') == "checkboxvse") {
+                    var check = $("#checkboxvse").prop("checked") ? true : false;
+                    var param =
+                        "list=1" +
+                        "&reg=" + $("#regnomfilter").val() +
+                        "&inn=" + $("#innfilter").val() +
+                        "&stat=" + $("#statfilter").val() +
+                        "&moi=" + check;
+
+                    if ($("#tabs1").hasClass("active")) {
+                        $("#upfrhistory").load("/pkv/upfr/historys", param);
+                    } else if ($("#tabs2").hasClass("active")) {
+                        $("#upfrhistory").load("/pkv/upfr/otopfr", param);
+                    } else if ($("#tabs3").hasClass("active")) {
+                        $("#upfrhistory").load("/pkv/upfr/rechupfr", param);
+                    }
+                    //console.log("checkboxvse= "+$("#checkboxvse").prop("checked") ? true : false);
+                }
+            });
+
+            //удалить заявление
+            $("#upfrhistory").on('click', 'a', function () {
+                if (this.getAttribute("name") == "delzayav") {
+                    var id = $(this).attr('id');
+                    var check = $("#checkboxvse").prop("checked") ? true : false;
+                    var param = "id=" + id +
+                        "&list=1" +
+                        "&reg=" + $("#regnomfilter").val() +
+                        "&inn=" + $("#innfilter").val() +
+                        "&stat=" + $("#statfilter").val() +
+                        "&moi=" + check;
+                    if (confirm("Точно удалить заявление с рег. номером " +
+                        $("#upfrhistory [name='" + id + "'] td").html().trim() + "?")) {
+                        $("#upfrhistory").load("/pkv/upfr/delzayav", param);
+                        clearPagination2();
+                    }
+
+                }
+
+                //добавление решения
+                if ($(this).attr("name") == "buttonrech") {
+                    var id = $(this).attr("id");
+                    var nomrech = $(this).closest("td").find("[name='nom_rech']").val();
+                    var datarech = $(this).closest("td").find("[name='data_rech']").val();
+
+                    var param = "zid=" + id +
+                        "&nomrech=" + nomrech +
+                        "&datarech=" + datarech;
+                    console.log("добавление решения= " + param);
+                    clearPagination2();
+                    $("#upfrhistory").load("/pkv/upfr/addrech", param);
+                }
+
+                //нет решения
+                if ($(this).attr("name") == "rechnull") {
+                    var id = $(this).attr("id");
+
+                    var param = "zid=" + id;
+                    console.log("нет решения= " + param);
+                    clearPagination2();
+                    $("#upfrhistory").load("/pkv/upfr/addrech", param);
+                }
+
+            });
+
+            //откат
+            $("#upfrhistory").on('click', 'a', function () {
+
+                if ($(this).attr('name') == "otcat") {
+                    alert("df");
+                    clearPagination2();
+                    var check = $("#checkboxvse").prop("checked") ? true : false;
+                    var param =
+                        "zid="+$(this).attr("value")+
+                        "&list=1" +
+                        "&reg=" + $("#regnomfilter").val() +
+                        "&inn=" + $("#innfilter").val() +
+                        "&stat=" + $("#statfilter").val() +
+                        "&moi=" + check;
+                    console.log("$(this).val()= "+$(this).attr("value"));
+
+                    $("#upfrhistory").load("/pkv/upfr/otcatr", param);
+                    //$("#upfrhistory").load("/pkv/upfr/rechupfr", param);
+                }
+            });
+
+            //переключатели страниц в модальном окне документа
+            $("#pagination4").on('click', 'a', function () {
+                var list;
+                //кнопка назад
+                if ($(this).text() == "Назад") {
+                    $("#pagination4 a").first().parent().removeClass("disabled").addClass("disabled");
+                    $("#pagination4 a").eq(1).text("1").parent().removeClass("active").addClass("active");
+                    $("#pagination4 a").eq(2).text("2").parent().removeClass("active");
+                    $("#pagination4 a").eq(3).text("3").parent().removeClass("active");
+                    $("#pagination4 a").eq(4).text("4").parent().removeClass("active");
+                    $("#pagination4 a").eq(5).text("5").parent().removeClass("active");
+                    list = 1;
+                } else //кнопка далее
+                if ($(this).text() == "Далее") {
+                    list = +$("#pagination4 a").eq(5).text()+1;
+                    $("#pagination4 a").first().parent().removeClass("disabled");
+                    $("#pagination4 a").eq(1).text(list).parent().removeClass("active").addClass("active");
+                    $("#pagination4 a").eq(2).text(+list + 1).parent().removeClass("active");
+                    $("#pagination4 a").eq(3).text(+list + 2).parent().removeClass("active");
+                    $("#pagination4 a").eq(4).text(+list + 3).parent().removeClass("active");
+                    $("#pagination4 a").eq(5).text(+list + 4).parent().removeClass("active");
+                } else {
+                    $("#pagination4 li.active").removeClass("active");
+                    $(this).parent().addClass("active");
+                    list = $(this).text();
+                    if (list == 1) {
+                        $("#pagination4 a").first().parent().removeClass("disabled").addClass("disabled");
+                    } else {
+                        $("#pagination4 li.disabled").removeClass("disabled");
+                    }
+                }
+
+                var param = "list=" + list;
+                $("#dliazamenyz").load("/pkv/opfr/containerdocz", param);
+            });
+
+            /*кнопка выбрать в модальной форме*/ //???????????????????????
+            $("#modaldokumentzayav").on('click', 'a', function () {
+                if ($(this).hasClass("vibdoc")) {
+
+                    $("#vvvodzayav").text($(this).closest("tr").find("td:first").text());
+                    $($("#vvvodzayav")).attr("value",$(this).attr("id"));
+                    console.log("vibdoc");
+                    $('#modaldokumentzayav').modal('close');
+                    return false;
+                }
+            });
+
+            //ЗАГРУЗКА ФАЙЛОВ
+            // обработка и отправка AJAX запроса при клике на кнопку upload_files
+            $("#butdocins").on('click', function (event) { //документ заяв
+
+                var token = $('#_csrf').attr('content');
+                var header = $('#_csrf_header').attr('content');
+
+                var data = new FormData();
+                jQuery.each(jQuery('#filedoc')[0].files, function (i, file) {
+                    data.append('file', file);
+                });
+                data.append('description', $("#description").val());
+                console.log("data= "+ data);
+
+                var form = $("#addDocumentForm");
+                $.ajax({
+                    type : "POST",
+                    url : form.attr("action"),
+                    data : data,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    type: 'POST',
+                    beforeSend: function(xhr) {
+                        alert("pfuheprf22");
+                        xhr.setRequestHeader(header, token);
+                    },
+
+                    success: function() {
+                        alert("pfuheprf");
+                        $("#description").val("");
+                        $('#filedoc').val("");
+
+                        $("#pagination4 a").first().parent().removeClass("disabled").addClass("disabled");
+                        $("#pagination4 a").eq(1).text("1").parent().removeClass("active").addClass("active");
+                        $("#pagination4 a").eq(2).text("2").parent().removeClass("active");
+                        $("#pagination4 a").eq(3).text("3").parent().removeClass("active");
+                        $("#pagination4 a").eq(4).text("4").parent().removeClass("active");
+                        $("#pagination4 a").eq(5).text("5").parent().removeClass("active");
+                        var list = 1;
+                        var param = "list=" + list;
+                        $("#dliazamenyz").load("/pkv/opfr/containerdocz", param);
+                        $('#div_modal_form_insert').modal('close');
+                    },
+                    error: function(request, status, error) {
+                        alert("request= "+request+
+                            "\nstatus= "+status+
+                            "\nerror= "+error
+                        );
+                    }
+                });
+                return;
+            });
+
+
+            /*Для выбора даты материалайз ничего не менять*/
+            $('.datepicker').datepicker({
+                autoClose: true,
+                setDefaultDate: true,//Сделайте defaultDate исходным выбранным значением.
+                showMonthAfterYear: true,//Показать месяц за годом в заголовке Datepicker.
+                showClearBtn: false,//Покажите кнопку очистки в параметре datepicker.
+                format: 'dd.mm.yyyy',
+                i18n: {
+                    cancel: 'Закрыть',
+                    clear: 'Очистить',
+                    months:
+                        [
+                            'Январь',
+                            'Февраль',
+                            'Март',
+                            'Апрель',
+                            'Май',
+                            'Июнь',
+                            'Июль',
+                            'Август',
+                            'Сентябрь',
+                            'Октябрь',
+                            'Ноябрь',
+                            'Декабрь'
+                        ],
+                    weekdays:
+                        [
+                            'Понедельний',
+                            'Вторник',
+                            'Среда',
+                            'Четверг',
+                            'Пятница',
+                            'Суббота',
+                            'Воскресенье'
+                        ],
+                    monthsShort:
+                        [
+                            'Янв',
+                            'Фев',
+                            'Мар',
+                            'Апр',
+                            'Май',
+                            'Июнь',
+                            'Июль',
+                            'Авг',
+                            'Сен',
+                            'Окт',
+                            'Ноя',
+                            'Дек'
+                        ],
+                    weekdaysShort:
+                        [
+                            'Пн',
+                            'Вт',
+                            'Ср',
+                            'Чт',
+                            'Пт',
+                            'Сб',
+                            'Вс'
+                        ],
+                    weekdaysAbbrev: ['П', 'В', 'С', 'Ч', 'П', 'С', 'В']
+                }
+
+            });
+
+        });
+    </script>
+</head>
+<body>
+
+<div th:insert="fragment/logout :: logout(${user})"></div>
+
+<div class="row" th:if="${user.rayon.kod.equals('000')}">
+    <div class="col s12">
+        <a th:href="@{/pkv/opfr}">
+            Внести данные от пользователя OПФР
+        </a>
+    </div>
+</div>
+
+<div class="row" id="vvodzayav" th:include="fragmentupfr/vvodzayav :: vvodzayav"></div>
+
+<div id="modaldokumentzayav" class="modal"
+     th:include="fragmentupfr/opfrfrag :: modaldokumentzayav(${dokumentzayav})">
+</div> <!--Модальное окно-->
+
+<!--pagination4-->
+<div id="div_modal_form_insert" class="modal">
+    <div class="modal-content">
+        <h4>Добавить файл</h4>
+        <form method="POST"
+              th:action="@{/pkv/opfr/dokumentinsertz}" enctype="multipart/form-data"
+              id="addDocumentForm" class="row">
+            <div class="col s12">
+                <div class="row">
+                    <div class="col s12">
+                        <label for="description">Введите имя файла</label>
+                        <input placeholder="Имя файла" name="description" id="description" type="text">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col s12">
+                        <input placeholder="Имя файла" name="file" id="filedoc" type="file" accept=".docx,.doc">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a id='butdocins' class="modal-close waves-effect waves-green btn-flat">Добавить</a>
+    </div>
+</div>
+
+<div class="row" id="upfrkbksum" th:include="fragmentupfr/vvodzayav :: upfrkbksum"></div>
+
+<div class="row" id="tabs">
+    <div class="col s12">
+        <ul class="tabs">
+            <li class="tab col s3"><a class="active" id="tabs1">Отправленые заявления</a></li>
+            <li class="tab col s3"><a id="tabs2">Получен ответ от ФНС</a></li>
+            <li class="tab col s3"><a id="tabs3">Решение принято</a></li>
+            <li class="col s3 center-align">
+                <label>
+                    <input id="checkboxvse" type="checkbox" checked/>
+                    <span>Только мои</span>
+                </label>
+            </li>
+            <!--<li class="tab col s3"><a href="#test4">Test 4</a></li>-->
+        </ul>
+    </div>
+</div>
+
+<div class="row" id="filter">
+    <div class="col s2">
+    </div>
+    <div class="col s2">
+        <input placeholder="Регистрационный номер" id="regnomfilter" type="text">
+    </div>
+    <div class="col s2">
+        <input placeholder="ИНН" id="innfilter" type="text">
+    </div>
+    <div class="col s2">
+        <select id="statfilter">
+            <option value="" selected>Выбор статуса</option>
+            <option th:each="s : ${stats}" th:value="${s.id}" th:text="${s.stat}"></option>
+        </select>
+        <label>Выбор статуса</label>
+    </div>
+    <div class="col s3">
+        <a class="waves-effect waves-light btn" id="filtergo">Применить фильтр</a>
+    </div>
+</div>
+
+<div class="row" id="upfrhistory" th:include="fragmentupfr/vvodzayav :: upfrhistory(${zayavs})"></div>
+
+<div id="pagination2" th:include="fragmentupfr/vvodzayav :: pagination"></div>
+
+<script type="text/javascript" src="/webjars/materialize/1.0.0-rc.2/dist/js/materialize.min.js"></script>
+</body>
+</html>

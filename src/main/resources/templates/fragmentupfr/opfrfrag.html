@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<body>
+
+<div th:fragment="opfrhistory(zayavs)">
+    <table>
+        <tr>
+            <th align="center">УПФР</th>
+            <th align="center">ОПФР</th>
+        </tr>
+        <tr th:each="z : ${zayavs}">
+            <td width="50%" align="center" name="upfr" th:include="fragmentupfr/otvet :: otupfr(${z})">
+            </td>
+
+            <td th:if="${stat==1}" width="50%" align="center" name="opfr" th:include="fragmentupfr/opfrfrag :: opfrdan(${z})">
+            </td>
+            <td th:unless="${stat==1}" width="50%" align="center" name="opfr" th:include="fragmentupfr/opfrfrag :: opfrdan2(${z})">
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+<div th:fragment="opfrdan(z)">
+    <div class="row">
+        <div class="col s6 center">
+            Номер запроса:
+        </div>
+        <div class="col s6 center">
+            <input type='text' name='nom_zap' maxlength="9" placeholder="Номер запроса*"
+                   title="Номер запроса" pattern="^[0-9]{1,20}$" required>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s6 center">
+            Дата направления в ФНС:
+        </div>
+        <div class="col s6 center">
+            <input type='date' name='data_otprav' maxlength="9" placeholder="Дата направления в ФНС*"
+                   title="Дата направления в ФНС"  required>
+        </div>
+    </div>
+
+<!--    <div class="row">
+        <div class="col s6 center">
+            Заявление:
+        </div>
+        <div class="col s6 center">
+            <a class="waves-effect waves-light btn modal-trigger"
+               th:name="${z.id}" href="#modaldokumentzayav">
+                Выбрать
+            </a>
+        </div>
+    </div>-->
+
+    <div class="row">
+        <div class="col s6 center">
+            <!--<a class="documentpechat" name="zapvfns" download>Запрос в ФНС</a>-->
+            <a th:href="@{/pkv/opfr/documentpechat(id=${z.id})}" download>Запрос в ФНС</a>
+        </div>
+        <div class="col s6 center">
+            <a class="waves-effect waves-light btn-small" th:id="${z.id}" name="rb1go">Добавить</a>
+        </div>
+    </div>
+</div>
+
+
+
+<div th:fragment="opfrdan2(z)">
+    <div class="row">
+        <div class="col s6 center">
+            Номер ответа от ФНС:
+        </div>
+        <div class="col s6 center">
+            <input type='text' name='nom_otv' placeholder="Номер ответа от ФНС"
+                   title="Номер ответа от ФНС" pattern="^[0-9]{1,20}$" required>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s6 center">
+            Дата ответа от ФНС:
+        </div>
+        <div class="col s6 center">
+            <input type='date' name='data_otv' maxlength="9" placeholder="Дата ответа от ФНС"
+                   title="Дата ответа от ФНС" required>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s6 center">
+            Документ:
+        </div>
+        <div class="col s6 center">
+            <a class="waves-effect waves-light btn modal-trigger go" th:name="${z.id}" href="#modaldokument">Выбрать</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s12 center">
+            <table border="1" align="center" cellspacing="0">
+                <tr>
+                    <th>КБК</th>
+                    <th>Вид платежа</th>
+                    <th>Сумма</th>
+                </tr>
+                <tr th:each="kbk : ${z.kbkVids}">
+                    <td th:text="${kbk.asvKbk.kbkCode}">
+                    </td>
+                    <td th:text="${kbk.asvKbk.getKbkShortName(20)}">
+                    </td>
+                    <td>
+                        <input type='text' th:name="${kbk.id}" placeholder='Сумма' title='Сумма'
+                               pattern='\d+(\.\d+)?' required>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s6 center">
+            <!--<a class="documentpechat" href="#" download>Запрос в ФНС</a>-->
+            <a th:href="@{/pkv/opfr/documentpechat(id=${z.id})}" download>Запрос в ФНС</a>
+        </div>
+        <div class="col s6 center">
+            <a class="waves-effect waves-light btn-small button1" th:id="${z.id}" name="rb2go">Добавить</a>
+        </div>
+    </div>
+</div>
+
+<!--Модальные окна-->
+<div th:fragment="modaldokumentzayav(dokumentzayav)">
+    <div class="modal-content">
+        <h4>Добавить файл</h4>
+
+        <div id="dliazamenyz" th:include="fragmentupfr/opfrfrag :: dokumentzayav(${dokumentzayav})">
+        </div>
+
+        <div id="pagination4" th:include="fragmentupfr/vvodzayav :: pagination"></div>
+        <input class="hide" type='text' id='iddoc'> <!--class="hide"-->
+    </div>
+</div>
+
+
+
+<div th:fragment="dokumentzayav(dokumentzayav)">
+    <a class="waves-effect waves-light btn modal-trigger" href="#div_modal_form_insert">Добавить</a>
+    <table align="center">
+        <tr>
+            <td align="center">Название</td>
+            <td align="center">Файл</td>
+            <td align="center">Выбор</td>
+        </tr>
+
+        <tr th:each="dz : ${dokumentzayav}">
+        <td align="center" th:text="${dz.nameDokument}"></td>
+        <td align="center" th:text="${dz.nameFile}"></td>
+        <td align="center"><a class="vibdoc" th:id="${dz.idDokumentzayav}">Выбрать</a></td>
+        </tr>
+
+    </table>
+</div>
+
+<!--Модальные окна2-->
+<div th:fragment="modaldokument(dokument)">
+    <div class="modal-content">
+        <h4>Добавить файл</h4>
+
+        <div id="dliazameny" th:include="fragmentupfr/opfrfrag :: dokument(${dokument})">
+        </div>
+
+        <div id="pagination3" th:include="fragmentupfr/vvodzayav :: pagination"></div>
+        <input class="hide" type='text' id='iddoc2'> <!--class="hide"-->
+    </div>
+</div>
+
+<div th:fragment="dokument(dokument)">
+    <a class="waves-effect waves-light btn modal-trigger" href="#div_modal_form_insertz">Добавить</a>
+    <table align="center">
+        <tr>
+            <td align="center">Название</td>
+            <td align="center">Файл</td>
+            <td align="center">Выбор</td>
+        </tr>
+
+        <tr th:each="dz : ${dokument}">
+            <td align="center" th:text="${dz.nameDokument}"></td>
+            <td align="center" th:text="${dz.nameFile}"></td>
+            <td align="center"><a class="vibdoc" th:id="${dz.id}">Выбрать</a></td>
+        </tr>
+
+    </table>
+</div>
+
+</body>
+</html>
